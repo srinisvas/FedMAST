@@ -1,0 +1,135 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "fed-learning-cifar-experiment"
+version = "1.0.0"
+description = "FedMAST: backdoor detection and containment in federated learning (Flower + PyTorch)"
+license = "Apache-2.0"
+requires-python = ">=3.10"
+dependencies = [
+    "flwr[simulation]>=1.20.0",
+    "flwr-datasets[vision]>=0.5.0",
+    "datasets>=2.18.0",
+    "torch==2.7.1",
+    "torchvision==0.22.1",
+    "numpy",
+    "scipy",
+    "scikit-learn",
+    "pandas",
+    "hdbscan",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["fed_learning_cifar_experiment"]
+
+[tool.flwr.app]
+publisher = "ssubram7"
+
+[tool.flwr.app.components]
+serverapp = "fed_learning_cifar_experiment.server_app:app"
+clientapp = "fed_learning_cifar_experiment.client_app:app"
+
+[tool.flwr.app.config]
+num-server-rounds = 10
+num-clients = 100
+fraction-fit = 0.1
+local-epochs = 4
+dirichlet-alpha = 0.3
+simulation-id = "fedmast-demo"
+
+aggregation-method = "fedmast"
+
+backdoor-attack-mode = "per-round-attack"
+backdoor-attack-type = "lga"
+num-malicious-clients = 3
+num-malicious-clients-per-round = 3
+backdoor-partition-ids = "[5,12,23,36,44,51,67,78,83,91]"
+attack-start-round = 3
+attack-end-round = 999999
+
+lga-epochs = 12
+lga-lr = 0.05
+lga-tau = 2.0
+
+neurotoxin-mask-ratio = 0.01
+neurotoxin-scale-factor = 1.0
+
+cas-epochs = 3
+cas-lr = 0.01
+cas-scale-factor = 1.0
+cas-lambda-prox = 0.5
+cas-poison-ratio = 0.5
+
+bc-tau = 0.95
+bc-lambda = 1.0
+bc-benign-epochs = 2
+bc-malicious-epochs = 2
+bc-lr = 0.1
+bc-proxy-count = 5
+bc-defense-sim = "multikrum"
+bc-norm-match-weight = 0.8
+bc-energy-smooth-noise = 0.03
+bc-direction-blend-alpha = 0.15
+bc-min-bsr-ratio = 0.5
+
+dba-epochs = 6
+dba-lr = 0.05
+dba-poison-ratio = 0.078125
+dba-num-attackers = 4
+dba-scale-factor = 1.0
+dba-server-eta = 1.0
+dba-attacker-partition-ids = "[5,12,23,36]"
+dba-paper-faithful = false
+dba-benign-lr = 0.1
+dba-benign-epochs = 2
+
+3dfed-target-label = 2
+3dfed-kappa = 100000
+3dfed-beta = 0.3
+3dfed-gamma = 1.0
+3dfed-alpha-step = 0.1
+3dfed-noise-lambda = 1.0
+3dfed-noise-dual-step = 0.1
+3dfed-noise-steps = 20
+3dfed-noise-lr = 0.01
+3dfed-decoy-steps = 20
+3dfed-decoy-lr = 0.01
+3dfed-cl-lr = 0.01
+3dfed-indicator-candidate-ratio = 0.01
+3dfed-indicator-count = 32
+3dfed-hessian-samples = 4
+3dfed-use-indicator = true
+3dfed-use-constrained-loss = true
+3dfed-use-noise-mask = true
+3dfed-use-decoy = true
+3dfed-num-backdoor-models = 2
+3dfed-num-decoy-models-init = 1
+3dfed-max-decoy-models = 2
+3dfed-canonical-partition-id = 5
+
+fedmast-threshold-k = 3.0
+fedmast-min-accept = 5
+fedmast-warmup-rounds = 2
+fedmast-buffer-rounds = 20
+fedmast-trajectory-window = 15
+fedmast-suspicious-policy = "coord-median"
+fedmast-history-mode = "load-readonly"
+fedmast-history-path = "fedmast_history_clean.json"
+fedmast-spectral-min-appearances = 5
+fedmast-spectral-decay = 0.7
+fedmast-spectral-percentile = 85.0
+fedmast-spectral-min-threshold = 1.2
+fedmast-ablate-squeeze = false
+fedmast-ablate-spectral = false
+fedmast-ablate-history = false
+fedmast-ablate-round = false
+
+[tool.flwr.federations]
+default = "local-simulation"
+
+[tool.flwr.federations.local-simulation]
+options.num-supernodes = 100
+options.backend.client-resources.num-cpus = 2
+options.backend.client-resources.num-gpus = 0

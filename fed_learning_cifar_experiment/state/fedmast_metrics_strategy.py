@@ -1537,17 +1537,17 @@ class SaveFedMASTMetricsStrategy(SaveFedAvgMetricsStrategy):
         ) if defense_results else False
 
         accepted_idx = [i for i, c in enumerate(client_ids) if c in accepted_cids]
-        no_accepted = len(accepted_idx) == 0
-        if no_accepted:
+        below_safety_floor = len(accepted_idx) < 3
+        if below_safety_floor:
             round_suspicious = True
             print(
-                f"[FedMAST][Round {rnd}] WARNING: 0 accepted — "
-                "fail-closed NOOP"
+                f"[FedMAST][Round {rnd}] Accepted set below safety floor "
+                f"({len(accepted_idx)} < 3) — retaining global model"
             )
 
         use_policy = (
             "noop"
-            if no_accepted
+            if below_safety_floor
             else (self.fedmast_suspicious_policy if round_suspicious else "fedavg")
         )
 

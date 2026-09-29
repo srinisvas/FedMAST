@@ -1,0 +1,201 @@
+{
+  "version": "fedmast-history-v1",
+  "total_rounds": 50,
+  "metadata": {
+    "model_id": "TinyResNet18-base_width_8",
+    "dataset": "CIFAR-10",
+    "dirichlet_alpha": "0.3",
+    "partition_seed": "42",
+    "history_rounds": "50",
+    "source_commit": "1de8e84b77a62a26a42fbdcfa08df0a3df453d24"
+  },
+  "raw_baseline": {
+    "total_update_l2_norm": {
+      "median": 0.23765549063682556,
+      "mad": 0.1508167186036706
+    },
+    "l2_distance_to_round_mean": {
+      "median": 0.22470688819885254,
+      "mad": 0.11770432730019093
+    },
+    "l2_distance_to_reference": {
+      "median": 0.2535904124379158,
+      "mad": 0.1470394378915429
+    },
+    "cosine_to_round_mean_update": {
+      "median": 0.3535123692526334,
+      "mad": 0.13443225329614938
+    },
+    "cosine_to_mean_leave_one_out": {
+      "median": 0.04980287082230382,
+      "mad": 0.13190221866413238
+    },
+    "cosine_to_reference_clean_delta": {
+      "median": 0.08143177857657055,
+      "mad": 0.08061562922055847
+    },
+    "stage_norm_signature_cos_to_round_mean": {
+      "median": 0.9979165293259722,
+      "mad": 0.0019405075897955004
+    },
+    "head_sign_agreement_with_ref": {
+      "median": 0.553906261920929,
+      "mad": 0.07876311616301536
+    },
+    "stage_head_l2_norm": {
+      "median": 0.02904029842466116,
+      "mad": 0.02121820005560294
+    },
+    "stage_layer4_l2_norm": {
+      "median": 0.17111266404390335,
+      "mad": 0.11304754016920923
+    },
+    "stage_head_norm_ratio_to_total": {
+      "median": 0.12093968175199471,
+      "mad": 0.01974258287212249
+    },
+    "classifier_to_backbone_norm_ratio": {
+      "median": 0.06086791378826376,
+      "mad": 0.011179317161865763
+    },
+    "head_backbone_conservation_product": {
+      "median": 3.414526576780159,
+      "mad": 1.176476465031285
+    },
+    "stage_head_spectral_entropy": {
+      "median": 1.4900945424416925,
+      "mad": 0.10218134638839257
+    },
+    "stage_head_top_sv_ratio": {
+      "median": 0.5212737749868188,
+      "mad": 0.05153416416641306
+    },
+    "stage_layer4_skewness": {
+      "median": 0.541552871465683,
+      "mad": 0.37230256031155584
+    },
+    "stage_layer3_kurtosis": {
+      "median": 6.105878829956055,
+      "mad": 1.9520863709449767
+    },
+    "backbone_kurtosis_max": {
+      "median": 30.465595245361328,
+      "mad": 10.310109972953796
+    },
+    "stage_layer4_cos_to_round_mean": {
+      "median": 0.3442334390985169,
+      "mad": 0.15462932531800855
+    },
+    "stage_head_cos_to_mean_loo": {
+      "median": 0.02331039928305706,
+      "mad": 0.30982825674604914
+    },
+    "per_class_delta_entropy": {
+      "median": 2.0735068321228027,
+      "mad": 0.06215387098789215
+    },
+    "stage_layer4_linf_to_l2_ratio": {
+      "median": 0.06818934232750402,
+      "mad": 0.01152044203978408
+    }
+  },
+  "z_baseline": {
+    "total_update_l2_norm": {
+      "median": 0.044449337684509385,
+      "mad": 0.8544774728404646
+    },
+    "l2_distance_to_round_mean": {
+      "median": 0.06091865042655187,
+      "mad": 0.7886173689677857
+    },
+    "l2_distance_to_reference": {
+      "median": 0.06063105952556325,
+      "mad": 0.8627556000858474
+    },
+    "cosine_to_round_mean_update": {
+      "median": 0.02692243742195326,
+      "mad": 0.6145756488064698
+    },
+    "cosine_to_mean_leave_one_out": {
+      "median": -1.9949319973733282e-17,
+      "mad": 0.8118435292253174
+    },
+    "cosine_to_reference_clean_delta": {
+      "median": -0.08747131518983448,
+      "mad": 0.909220754327141
+    },
+    "stage_norm_signature_cos_to_round_mean": {
+      "median": -0.05462184410256879,
+      "mad": 1.004805525106351
+    },
+    "head_sign_agreement_with_ref": {
+      "median": 0.0015428996149151226,
+      "mad": 0.8992463094112404
+    },
+    "stage_head_l2_norm": {
+      "median": -0.02191272470623932,
+      "mad": 0.958237822759442
+    },
+    "stage_layer4_l2_norm": {
+      "median": 0.04913998363821585,
+      "mad": 0.905585532953812
+    },
+    "stage_head_norm_ratio_to_total": {
+      "median": -0.2169178537699638,
+      "mad": 0.820774812489007
+    },
+    "classifier_to_backbone_norm_ratio": {
+      "median": -0.2624890025441349,
+      "mad": 0.8707726824507656
+    },
+    "head_backbone_conservation_product": {
+      "median": -0.41353607010693105,
+      "mad": 0.6563519913714797
+    },
+    "stage_head_spectral_entropy": {
+      "median": 0.29002029980047744,
+      "mad": 0.664092295883818
+    },
+    "stage_head_top_sv_ratio": {
+      "median": -0.22588248129694372,
+      "mad": 0.6861346666033991
+    },
+    "stage_layer4_skewness": {
+      "median": 0.02805640597659597,
+      "mad": 0.9089438812452143
+    },
+    "stage_layer3_kurtosis": {
+      "median": 0,
+      "mad": 0.8827584074663082
+    },
+    "backbone_kurtosis_max": {
+      "median": -0.3312255863918865,
+      "mad": 0.6810678466644684
+    },
+    "stage_layer4_cos_to_round_mean": {
+      "median": -1.4224732503009818e-16,
+      "mad": 0.6180438512965887
+    },
+    "stage_head_cos_to_mean_loo": {
+      "median": 0.0029353115608822568,
+      "mad": 0.8870910692925884
+    },
+    "per_class_delta_entropy": {
+      "median": 0.21931299013508565,
+      "mad": 0.7770236509490444
+    },
+    "stage_layer4_linf_to_l2_ratio": {
+      "median": -0.3050134679434469,
+      "mad": 0.5674846883518313
+    }
+  },
+  "aggregate_ema": [
+    0.029997284428092415,
+    0.05621530828705024,
+    0.0774266333310952,
+    0.1188986257365879,
+    0.16406486346856397,
+    0.028338166051144843
+  ],
+  "aggregate_n_rounds": 17
+}

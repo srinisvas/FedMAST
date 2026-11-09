@@ -40,7 +40,7 @@ def main():
     p.add_argument("files", nargs="+", help="Counterfactual CSV paths or glob patterns")
     p.add_argument("--output", default="study_runs/scc_interactions.csv")
     args = p.parse_args()
-    paths = sorted(set(str(p) for pattern in args.files for p in glob.glob(pattern)))
+    paths = sorted(set(str(p) for pattern in args.files for p in glob.glob(pattern, recursive=True)))
     if not paths:
         p.error("No matching counterfactual CSV files")
     groups = defaultdict(list)

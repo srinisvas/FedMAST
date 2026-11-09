@@ -152,7 +152,9 @@ kernel dimensions defines `P_cb(D)`. The diagnostic evaluates:
 `Q_cb` keeps the same output channel, the same number of raw-coordinate
 degrees of freedom, and the same L2 intervention energy as `P_cb`.
 For every condition, clean accuracy and targeted ASR are evaluated on
-exactly the same fixed CIFAR-10 subset. The ASR denominator excludes
+exactly the same fixed CIFAR-10 subset. The counterfactual CLI detects
+DBA from `study_run.json` and evaluates its combined global DBA trigger,
+rather than the standard patch. Use `--trigger-type` to override if needed. The ASR denominator excludes
 examples whose clean label already equals the target label.
 
 This is **ablation of an observed update**, not construction of a new

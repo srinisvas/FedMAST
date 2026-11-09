@@ -17,7 +17,7 @@ from fed_learning_cifar_experiment.study.spectral import (
     rank_channels_by_energy,
 )
 from fed_learning_cifar_experiment.task import (
-    get_resnet_cnn_model, load_test_data_for_eval, set_weights,
+    apply_dba_trigger, get_resnet_cnn_model, load_test_data_for_eval, set_weights,
 )
 from fed_learning_cifar_experiment.utils.backdoor_attack import add_trigger
 
@@ -79,7 +79,7 @@ def cache_eval_batches(max_samples: int, batch_size: int = 64):
 
 
 @torch.no_grad()
-def evaluate_paired(model, batches, device, target_label=2):
+def evaluate_paired(model, batches, device, target_label=2, trigger_type="standard"):
     """Clean accuracy and targeted ASR on exactly the same fixed subset."""
     model.to(device)
     model.eval()
@@ -91,7 +91,12 @@ def evaluate_paired(model, batches, device, target_label=2):
         clean_total += int(labels.numel())
         mask = labels != target_label
         if mask.any():
-            triggered = torch.stack([add_trigger(x) for x in imgs[mask]])
+            if trigger_type == "dba":
+                triggered = apply_dba_trigger(imgs[mask], attacker_index=None)
+            elif trigger_type == "standard":
+                triggered = torch.stack([add_trigger(x) for x in imgs[mask]])
+            else:
+                raise ValueError("trigger_type must be standard or dba")
             pred_bd = model(triggered).argmax(dim=1)
             triggered_success += int((pred_bd == target_label).sum().item())
             triggered_total += int(mask.sum().item())
@@ -115,6 +120,7 @@ def run_counterfactuals(
     seed: int = 13,
     max_samples: int = 512,
     device: str | None = None,
+    trigger_type: str = "auto",
 ):
     """Compare channel-band deletion with a matched coordinate deletion.
 
@@ -154,16 +160,25 @@ def run_counterfactuals(
                           min(max_layers, len(candidate_layers)), dtype=int)
         chosen_layers = [candidate_layers[int(i)] for i in ids]
 
+    if trigger_type == "auto":
+        config_path = Path(snapshot).parent.parent / "study_run.json"
+        if config_path.exists():
+            config = json.loads(config_path.read_text(encoding="utf-8")).get("run_config", {})
+            trigger_type = "dba" if config.get("backdoor-attack-type") == "dba" else "standard"
+        else:
+            trigger_type = "standard"
+    if trigger_type not in ("standard", "dba"):
+        raise ValueError("trigger_type must be auto, standard or dba")
     device = device or ("cuda:0" if torch.cuda.is_available() else "cpu")
     batches = cache_eval_batches(max_samples)
     model = get_resnet_cnn_model()
     set_weights(model, source_state)
-    baseline = evaluate_paired(model, batches, device)
+    baseline = evaluate_paired(model, batches, device, trigger_type=trigger_type)
     rng = np.random.default_rng(seed)
     output_csv = Path(output_csv)
     output_csv.parent.mkdir(parents=True, exist_ok=True)
     columns = [
-        "snapshot", "round", "source", "malicious_flag", "layer", "channel",
+        "snapshot", "round", "source", "trigger_type", "malicious_flag", "layer", "channel",
         "band", "control", "intervention_l2", "clean_accuracy", "asr",
         "delta_clean_accuracy", "delta_asr", "baseline_clean_accuracy",
         "baseline_asr", "clean_count", "triggered_count",
@@ -197,11 +212,12 @@ def run_counterfactuals(
                             np.asarray(source_state[i]).dtype, copy=False
                         )
                         set_weights(model, modified)
-                        metrics = evaluate_paired(model, batches, device)
+                        metrics = evaluate_paired(model, batches, device, trigger_type=trigger_type)
                         writer.writerow({
                             "snapshot": str(snapshot),
                             "round": meta["round"],
                             "source": source_label,
+                            "trigger_type": trigger_type,
                             "malicious_flag": malicious_flag,
                             "layer": layer,
                             "channel": channel,
@@ -219,4 +235,4 @@ def run_counterfactuals(
                         })
                         count += 1
     return {"rows": count, "baseline": baseline, "output": str(output_csv),
-            "layers": chosen_layers, "source": source_label}
+            "layers": chosen_layers, "source": source_label, "trigger_type": trigger_type}

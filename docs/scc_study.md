@@ -206,6 +206,11 @@ If these fail, stop rather than describing the combination as novel.
   implementation. `study-seed` seeds server RNG and each client's
   round-local RNG, but does not independently resample partitions.
   Flower/Ray scheduling and GPU kernels can still be nondeterministic.
+- Channel indices are not aligned across independently initialized models
+  because hidden channels can be permuted. Validate a *selection rule* or
+  distributional pattern across seeds, not the identity of channel number 7.
+- With 3x3 kernels there are only nine spatial DCT coefficients per
+  input-output kernel, so the low/mid/high partition is deliberately coarse.
 - Snapshot interventions are local diagnostics. A full factorial attack
   comparison, matched-parameter budgets, joint selection training,
   held-out transfer and server-side counterfactual aggregation are

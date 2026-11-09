@@ -16,3 +16,6 @@ data/
 *.log
 *.out
 *.err
+
+# Spectral causal criticality study output (may contain full client model states)
+study_runs/

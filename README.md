@@ -1,5 +1,7 @@
 # Backdoors Leave Structural Traces: FedMAST for Backdoor Detection and Containment in Federated Learning
 
+> **SCC research branch:** This branch adds an opt-in observational benchmark and spatial-frequency counterfactual study. Start with the [SCC study guide](docs/scc_study.md). The published behavior remains the default when `study-enabled=false`.
+
 **Accepted at the 38th IEEE International Conference on Tools with Artificial Intelligence (ICTAI)**
 
 **Artifact DOI:** https://doi.org/10.5281/zenodo.22885416

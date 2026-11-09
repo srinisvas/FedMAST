@@ -1,6 +1,7 @@
 import json
 import random
 
+import numpy as np
 import torch
 
 from flwr.client import ClientApp, NumPyClient
@@ -39,6 +40,17 @@ class FlowerClient(NumPyClient):
         return {"partition_id": str(self.context.node_config["partition-id"])}
 
     def fit(self, parameters, config):
+        # Deterministic per-client/per-round RNG for opt-in study runs only.
+        # Worker scheduling can still introduce nondeterminism outside this scope.
+        if str(self.context.run_config.get("study-enabled", False)).lower() in ("true", "1", "yes"):
+            seed = (int(self.context.run_config.get("study-seed", 42))
+                    + 100003 * int(config.get("current-round", 0))
+                    + int(self.context.node_config.get("partition-id", 0)))
+            random.seed(seed)
+            np.random.seed(seed % (2**32))
+            torch.manual_seed(seed)
+            if torch.cuda.is_available():
+                torch.cuda.manual_seed_all(seed)
         set_weights(self.net, parameters)
         init_state = {k: v.cpu().clone() for k, v in self.net.state_dict().items()}
         init_vec = parameters_to_vector(self.net.parameters()).detach().cpu().clone()

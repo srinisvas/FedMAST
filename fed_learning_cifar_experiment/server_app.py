@@ -1,5 +1,8 @@
 import json
 import os
+import random
+
+import numpy as np
 
 import torch
 from flwr.common import Context, ndarrays_to_parameters
@@ -65,6 +68,22 @@ def _make_evaluate_fn(model, test_data, attack_type="none"):
 
 
 def server_fn(context: Context):
+    study_enabled = str(context.run_config.get("study-enabled", False)).lower() in ("true", "1", "yes")
+    if study_enabled:
+        from fed_learning_cifar_experiment.utils import logger as study_logger
+        from fed_learning_cifar_experiment.study.capture import write_run_metadata
+
+        study_dir = str(context.run_config.get("study-run-dir", "study_runs/default"))
+        seed = int(context.run_config.get("study-seed", 42))
+        random.seed(seed)
+        np.random.seed(seed)
+        torch.manual_seed(seed)
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed_all(seed)
+        study_logger.out_dir = study_dir
+        write_run_metadata(study_dir, context.run_config)
+        print(f"[SCC] Study enabled: output={study_dir} seed={seed}")
+
     num_rounds = context.run_config["num-server-rounds"]
     num_clients = context.run_config["num-clients"]
     simulation_id = context.run_config.get("simulation-id")
@@ -287,6 +306,21 @@ def server_fn(context: Context):
         raise ValueError(
             f"Unsupported aggregation-method: {aggregation_method}. "
             "Choose one of: fedavg, multikrum, trimmed_mean, alignins, flame, fedmast."
+        )
+
+    if study_enabled:
+        from fed_learning_cifar_experiment.study.capture import attach_study_capture
+
+        capture_rounds_raw = context.run_config.get("study-capture-rounds", "[3,10]")
+        capture_rounds = json.loads(capture_rounds_raw) if isinstance(capture_rounds_raw, str) else capture_rounds_raw
+        if not isinstance(capture_rounds, list):
+            raise ValueError("study-capture-rounds must be a JSON list of round numbers")
+        spectral_summary = str(context.run_config.get("study-spectral-summary", True)).lower() in ("true", "1", "yes")
+        attach_study_capture(
+            strategy,
+            study_dir,
+            capture_rounds={int(r) for r in capture_rounds},
+            spectral_summary=spectral_summary,
         )
 
     config = ServerConfig(num_rounds=num_rounds)

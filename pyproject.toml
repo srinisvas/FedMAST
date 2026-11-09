@@ -39,6 +39,13 @@ local-epochs = 4
 dirichlet-alpha = 0.3
 simulation-id = "fedmast-demo"
 
+# Opt-in SCC observational study. Defaults leave the published artifact unchanged.
+study-enabled = false
+study-run-dir = "study_runs/default"
+study-seed = 42
+study-capture-rounds = "[3,10]"
+study-spectral-summary = true
+
 aggregation-method = "fedmast"
 
 backdoor-attack-mode = "per-round-attack"

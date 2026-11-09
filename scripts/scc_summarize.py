@@ -52,11 +52,29 @@ def run_summary(folder):
         safe_float(r["centralized_asr"]) for r in history
         if int(status["config"]["attack-start-round"]) <= int(r["round"]) <= end
     ]
+    feature_rows = [
+        row for file in sorted(folder.glob("per_update_features_*.csv"))
+        for row in read_csv(file)
+    ]
+    classified = [
+        (int(row["malicious_flag"]), int(row["selected_by_aggregator"]))
+        for row in feature_rows
+        if row.get("malicious_flag") in ("0", "1")
+        and row.get("selected_by_aggregator") in ("0", "1")
+    ]
+    tp = sum(mal == 1 and selected == 0 for mal, selected in classified)
+    fn = sum(mal == 1 and selected == 1 for mal, selected in classified)
+    fp = sum(mal == 0 and selected == 0 for mal, selected in classified)
+    tn = sum(mal == 0 and selected == 1 for mal, selected in classified)
     return {
         "run_id": status["id"], "attack": status["attack"],
         "aggregation": status["aggregation"], "seed": status["seed"],
         "status": status.get("returncode"),
         "rounds_recorded": len(history),
+        "detection_tp": tp, "detection_fn": fn, "detection_fp": fp,
+        "detection_tn": tn,
+        "detection_recall": tp / (tp + fn) if tp + fn else math.nan,
+        "detection_fpr": fp / (fp + tn) if fp + tn else math.nan,
         "last_round": int(history[-1]["round"]),
         "final_clean_accuracy": accs[-1],
         "final_asr": asrs[-1],
@@ -109,7 +127,7 @@ def main():
     rows = []
     fields = ("final_clean_accuracy", "final_asr", "attack_window_mean_asr",
               "post_attack_mean_asr", "final_clean_drop_vs_benign",
-              "final_asr_excess_vs_benign")
+              "final_asr_excess_vs_benign", "detection_recall", "detection_fpr")
     for (attack, agg), group in sorted(groups.items()):
         row = {"attack": attack, "aggregation": agg, "completed_seeds": len(group)}
         for key in fields:

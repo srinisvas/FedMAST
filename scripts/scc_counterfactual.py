@@ -24,6 +24,7 @@ def main():
     p.add_argument("--seed", type=int, default=13)
     p.add_argument("--max-samples", type=int, default=512)
     p.add_argument("--device")
+    p.add_argument("--trigger-type", choices=("auto", "standard", "dba"), default="auto")
     p.add_argument("--output", help="CSV path (default: beside snapshot)")
     args = p.parse_args()
     src = Path(args.snapshot)
@@ -34,7 +35,7 @@ def main():
         layer_names=args.layers.split(",") if args.layers else None,
         max_layers=args.max_layers, max_channels=args.max_channels,
         selection=args.selection, seed=args.seed, max_samples=args.max_samples,
-        device=args.device,
+        device=args.device, trigger_type=args.trigger_type,
     )
     print(json.dumps(result, indent=2))
 

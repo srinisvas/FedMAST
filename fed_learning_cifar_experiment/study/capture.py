@@ -6,7 +6,7 @@ aggregation. All snapshots are saved on the server for offline analysis.
 from __future__ import annotations
 
 import json
-import os
+import math
 import traceback
 from datetime import datetime, timezone
 from pathlib import Path
@@ -26,7 +26,9 @@ def _jsonable(value):
     if isinstance(value, (np.integer,)):
         return int(value)
     if isinstance(value, (np.floating,)):
-        return float(value)
+        return _jsonable(float(value))
+    if isinstance(value, float) and not math.isfinite(value):
+        return None
     if isinstance(value, (bool, int, float, str)) or value is None:
         return value
     if isinstance(value, (list, tuple)):

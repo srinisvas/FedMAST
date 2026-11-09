@@ -134,6 +134,11 @@ def main():
         print("Dry run only. Add --execute to run experiments.")
         return 0
 
+    revision = subprocess.run(
+        ["git", "rev-parse", "HEAD"], cwd=ROOT, capture_output=True, text=True,
+        check=False,
+    )
+    git_sha = revision.stdout.strip() if revision.returncode == 0 else "unknown"
     failed = 0
     for job in runs:
         run_dir = Path(job["run_dir"])
@@ -144,7 +149,8 @@ def main():
             if status.get("returncode") == 0:
                 print(f"[skip] {job['id']} (already completed)")
                 continue
-        status = {**job, "started_at_utc": datetime.now(timezone.utc).isoformat(),
+        status = {**job, "git_sha": git_sha,
+                  "started_at_utc": datetime.now(timezone.utc).isoformat(),
                   "returncode": None}
         status_path.write_text(json.dumps(status, indent=2) + "\n", encoding="utf-8")
         print(f"[run] {job['id']}", flush=True)

@@ -22,7 +22,9 @@ from fed_learning_cifar_experiment.task import (
     get_resnet_cnn_model,
     load_test_data_for_eval,
     set_weights,
+    test_eval,
 )
+from fed_learning_cifar_experiment.utils.logger import append_centralized_round
 
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -42,8 +44,8 @@ def _make_evaluate_fn(model, test_data, attack_type="none"):
         return base_fn
 
     def dba_evaluate_fn(server_round, parameters, config):
-        loss, metrics = base_fn(server_round, parameters, config)
-
+        # The base evaluator logs standard-trigger ASR. DBA has a distinct
+        # trigger, so log the DBA metric instead of the incorrect baseline.
         eval_model = get_resnet_cnn_model()
         set_weights(eval_model, parameters)
 
@@ -51,17 +53,17 @@ def _make_evaluate_fn(model, test_data, attack_type="none"):
             "cuda:0" if torch.cuda.is_available() else "cpu"
         )
         eval_model.to(device)
-
+        loss, accuracy = test_eval(eval_model, test_data, device=device)
         dba_metrics = evaluate_dba_asr(
             eval_model, test_data, target_label=2, device=device,
         )
-
-        metrics = dict(metrics or {})
-        metrics["asr"] = float(dba_metrics["dba_asr_global"])
-        metrics.update(
-            {key: float(value) for key, value in dba_metrics.items()}
+        metrics = {"mta": float(accuracy),
+                   "asr": float(dba_metrics["dba_asr_global"])}
+        metrics.update({key: float(value) for key, value in dba_metrics.items()})
+        append_centralized_round(
+            config.get("simulation-id"), server_round, loss, accuracy,
+            metrics["asr"], config.get("num-clients"),
         )
-
         return loss, metrics
 
     return dba_evaluate_fn

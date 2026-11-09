@@ -1,0 +1,30 @@
+name: SCC study checks
+
+on:
+  push:
+    branches:
+      - research/spectral-causal-criticality
+  pull_request:
+    paths:
+      - "fed_learning_cifar_experiment/study/**"
+      - "scripts/scc_*.py"
+      - "tests/test_scc_*.py"
+      - ".github/workflows/scc-tests.yml"
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Install dependencies
+        run: python -m pip install -e .
+      - name: Existing artifact consistency
+        run: python scripts/validate_artifact.py
+      - name: SCC unit tests
+        run: python -m unittest discover -s tests -v
+      - name: Preview study matrix
+        run: python scripts/run_scc_matrix.py --profile smoke

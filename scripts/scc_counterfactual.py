@@ -27,7 +27,7 @@ def main():
     p.add_argument("--output", help="CSV path (default: beside snapshot)")
     args = p.parse_args()
     src = Path(args.snapshot)
-    name = f"counterfactual_{'aggregate' if args.client_index is None else 'client_'+str(args.client_index)}.csv"
+    name = f"counterfactual_{src.stem}_{'aggregate' if args.client_index is None else 'client_'+str(args.client_index)}.csv"
     output = args.output or str(src.with_name(name))
     result = run_counterfactuals(
         src, output, client_index=args.client_index,
